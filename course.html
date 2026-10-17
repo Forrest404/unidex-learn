@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course</title>
+<meta name="description" content="A coding course for beginners. Each lesson covers one idea, and you write and run the code in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="unidex learn">
+<meta property="og:image" content="https://learn.unidex.shop/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header data-chrome><noscript><nav><a href="./">Courses</a></nav></noscript></header>
+<main>
+  <div id="course" hidden>
+    <div class="page-head">
+      <h1 id="title"></h1>
+      <p class="lead" id="blurb"></p>
+      <div class="actions"><a class="button" id="continue" href="#">Start</a><span class="chip" id="count"></span></div>
+    </div>
+    <ol class="lesson-list" id="lessons"></ol>
+  </div>
+  <p class="bad" id="problem" hidden></p>
+  <noscript><p>The courses need JavaScript to run your code.</p></noscript>
+</main>
+<footer data-chrome></footer>
+<script type="module" src="chrome.js"></script>
+<script type="module" src="course.js"></script>
+</body>
+</html>

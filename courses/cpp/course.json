@@ -1,0 +1,20 @@
+{
+  "title": "C++ for beginners",
+  "lang": "cpp",
+  "blurb": "Never written code before? Start here. By the end you'll write small programs that take input, make choices, repeat things and work with lists.",
+  "lessons": [
+    "01-hello.md",
+    "02-printing.md",
+    "03-variables.md",
+    "04-maths.md",
+    "05-input.md",
+    "06-if.md",
+    "07-more-choices.md",
+    "08-while.md",
+    "09-for.md",
+    "10-functions.md",
+    "11-vectors.md",
+    "12-strings.md",
+    "13-project.md"
+  ]
+}

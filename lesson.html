@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson</title>
+<meta name="description" content="A short coding lesson. You write the code and run it in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="unidex learn">
+<meta property="og:image" content="https://learn.unidex.shop/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header data-chrome><noscript><nav><a href="./">Courses</a></nav></noscript></header>
+<main class="wide">
+  <p class="crumbs" id="crumbs"></p>
+  <div class="lesson" id="lesson" hidden>
+    <article class="lesson-text">
+      <h1 id="title"></h1>
+      <div id="text"></div>
+    </article>
+    <aside class="workspace" aria-labelledby="ws-head">
+      <h2 class="field-label" id="ws-head">Your code</h2>
+      <div id="code"></div>
+      <div class="run-bar">
+        <button type="button" class="secondary" id="run">Run</button>
+        <button type="button" id="check">Check</button>
+        <span class="done-mark" id="done-mark" hidden>Done</span>
+      </div>
+      <div class="stdin" id="stdin-box" hidden>
+        <label for="stdin">Input <span class="hint">what your program reads with cin</span></label>
+        <textarea id="stdin" spellcheck="false"></textarea>
+      </div>
+      <p class="field-label" id="out-label">Output</p>
+      <div class="output" id="output" role="log" aria-labelledby="out-label" tabindex="0"
+           data-empty="Press Run to see what your program prints."></div>
+      <div class="run-bar more">
+        <button type="button" class="quiet small" id="show-answer" aria-expanded="false" aria-controls="answer">Show the answer</button>
+        <button type="button" class="quiet small" id="reset">Start again</button>
+      </div>
+      <div id="answer" hidden>
+        <p class="note">One way to do it. Yours can be different and still be right.</p>
+        <pre><code id="answer-code"></code></pre>
+      </div>
+  <p class="note privacy">Run and Check send your code to <a href="https://godbolt.org" target="_blank" rel="noopener">Compiler Explorer</a> to build it, or to <a href="https://wandbox.org" target="_blank" rel="noopener">Wandbox</a> if that's busy. Nothing else leaves this browser.</p>
+    </aside>
+  </div>
+  <nav class="pager" id="pager" aria-label="Lessons" hidden></nav>
+  <p class="bad" id="problem" hidden></p>
+  <noscript><p>The lessons need JavaScript to show and run your code.</p></noscript>
+</main>
+<footer data-chrome></footer>
+<script type="module" src="chrome.js"></script>
+<script type="module" src="lesson.js"></script>
+</body>
+</html>

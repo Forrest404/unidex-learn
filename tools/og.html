@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- The link-preview picture (og.png, 1200 x 630). Remake it with: node tools/make-og.mjs -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../style.css">
+<style>
+  :root { color-scheme: light; --bg: #f4f1ea; --fg: #141414; --muted: #645e55; --card: #faf8f3; --line-strong: #b5ad9e;
+          --code-kw: #1f4e8c; --code-type: #8a5a00; --code-str: #a63c26; --code-num: #2d6a39; --code-call: #5b3b8c; }
+  body { width: 1200px; height: 630px; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
+         padding: 0 76px; background: var(--bg); color: var(--fg); min-height: 0; }
+  .brand { gap: 14px; margin: 0 0 32px; }
+  .brand .logo { width: 300px; height: 63px; }
+  .brand small { font-size: 26px; color: var(--muted); }
+  h1 { font-size: 64px; line-height: 1.02; margin: 0 0 20px; }
+  p { font-size: 24px; color: var(--muted); margin: 0; line-height: 1.4; }
+  pre { font-size: 21px; line-height: 1.6; padding: 28px 32px; margin: 0; background: var(--card); border: 1.5px solid var(--fg);
+        border-left-width: 4px; box-shadow: 0 3px 0 var(--fg); }
+  pre code { font: inherit; }
+  .out { margin-top: 18px; font: 400 20px var(--font-mono); color: var(--muted); }
+</style>
+</head>
+<body>
+<div>
+  <div class="brand" id="brand"></div>
+  <h1>Learn to code</h1>
+  <p>One idea per lesson. You write the code and run it in your browser.</p>
+</div>
+<div>
+  <pre><code id="code"></code></pre>
+  <div class="out">→ Hello, world!</div>
+</div>
+<script type="module">
+  import { highlight } from '../highlight.js';
+  document.getElementById('code').innerHTML = highlight('#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, world!";\n}', 'cpp');
+  // The logo, as the header draws it
+  const src = await (await fetch('../chrome.js')).text();
+  const d = /const LOGO_D = '([^']+)'/.exec(src)[1];
+  document.getElementById('brand').innerHTML = `<svg class="logo" viewBox="0 0 1000 210.61" shape-rendering="crispEdges"><path d="${d}" fill="currentColor"/></svg><small>learn</small>`;
+  document.body.dataset.ready = '1';
+</script>
+</body>
+</html>

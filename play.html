@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground</title>
+<meta name="description" content="Write any C++ program and run it in your browser.">
+<link rel="canonical" href="https://learn.unidex.shop/play.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="unidex learn">
+<meta property="og:title" content="C++ Playground">
+<meta property="og:description" content="Write any C++ program and run it in your browser.">
+<meta property="og:url" content="https://learn.unidex.shop/play.html">
+<meta property="og:image" content="https://learn.unidex.shop/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header data-chrome><noscript><nav><a href="./">Courses</a></nav></noscript></header>
+<main class="wide">
+  <div class="page-head">
+    <h1>Playground</h1>
+    <p class="lead">Write any C++ program and run it. What you type stays in this browser.</p>
+  </div>
+  <div id="code"></div>
+  <div class="run-bar">
+    <button type="button" id="run">Run</button>
+    <button type="button" class="secondary" id="reset">Start again</button>
+    <span class="hint">Ctrl or ⌘ + Enter runs it</span>
+  </div>
+  <div class="stdin">
+    <label for="stdin">Input <span class="hint">what your program reads with cin, if anything</span></label>
+    <textarea id="stdin" spellcheck="false"></textarea>
+  </div>
+  <p class="field-label" id="out-label">Output</p>
+  <div class="output" id="output" role="log" aria-labelledby="out-label" tabindex="0" data-empty="Press Run to see what your program prints."></div>
+  <p class="note privacy">Run sends your code to <a href="https://godbolt.org" target="_blank" rel="noopener">Compiler Explorer</a> to build it, or to <a href="https://wandbox.org" target="_blank" rel="noopener">Wandbox</a> if that's busy. Nothing else leaves this browser.</p>
+</main>
+<footer data-chrome></footer>
+<script type="module" src="chrome.js"></script>
+<script type="module" src="play.js"></script>
+</body>
+</html>

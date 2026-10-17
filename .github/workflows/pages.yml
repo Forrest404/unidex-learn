@@ -1,0 +1,53 @@
+# Tests the site and every lesson, then publishes it to GitHub Pages (learn.unidex.shop).
+# Runs on every push to main, or by hand from the Actions tab.
+name: Site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Unit tests
+        run: node --test tests/highlight.test.mjs tests/lesson-format.test.mjs
+      - name: Every lesson, on the real compilers
+        run: node --test --test-concurrency=1 --test-timeout=180000 tests/lessons.test.mjs
+      - name: The pages, in headless Chrome
+        env:
+          CHROME: /usr/bin/google-chrome
+        run: node --test --test-timeout=180000 tests/pages.test.mjs
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Only the site's own files
+        run: |
+          mkdir _site
+          cp -r *.html *.js *.css og.png favicon.svg CNAME fonts courses _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
