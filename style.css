@@ -339,3 +339,29 @@ a.tile b::after { content: " →"; font-weight: 400; }
 
 /* Touch screens: every button at least 44px tall */
 @media (pointer: coarse) { button.small, .button.small { min-height: 44px; } }
+
+/* ---------- the app workspace (app-workspace.js) and the virtual unidex (device.js) ---------- */
+@media (min-width: 1001px) { .lesson.app { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
+.tabs { display: flex; border-bottom: var(--rule); overflow-x: auto; }
+.tabs button { background: none; color: var(--muted); border: 0; box-shadow: none; border-radius: 0; min-height: 40px;
+               padding: var(--s2) var(--s4); font: 400 13px var(--font-mono); }
+.tabs button:hover { color: var(--fg); opacity: 1; }
+.tabs button:active { transform: none; }
+.tabs button[aria-selected=true] { background: var(--fg); color: var(--bg); }
+.app-ws .code { height: min(38vh, 340px); border-top: 0; }
+.device-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s4); align-items: start; margin-top: var(--s4); }
+.device { background: var(--card); border: 1px solid var(--line-strong); border-radius: 18px; padding: var(--s4); width: 234px; }
+.device:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.device canvas { display: block; width: 200px; height: 200px; image-rendering: pixelated; border: 1px solid var(--line);
+                 border-radius: 2px; background: #e9e6da; }
+.device-buttons { display: flex; gap: var(--s3); margin-top: var(--s3); }
+.device-buttons button { flex: 1; min-height: 48px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.device-buttons button.down { transform: translateY(2px); box-shadow: 0 0 0 var(--fg); }
+.device-hint { font-size: 12px; color: var(--muted); margin: var(--s2) 0 0; line-height: 1.4; }
+.device-out .field-label { margin-top: 0; }
+.device-out .output { min-height: 200px; max-height: 260px; }
+@media (max-width: 560px) {
+  .device-row { grid-template-columns: minmax(0, 1fr); }
+  .device { margin: 0 auto; }
+  .device-out .output { min-height: 96px; }
+}

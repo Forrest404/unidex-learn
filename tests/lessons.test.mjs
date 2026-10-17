@@ -21,6 +21,7 @@ const passes = async (lang, code, tests) => {
 
 for (const id of JSON.parse(read('courses/index.json'))) {
   const course = JSON.parse(read(`courses/${id}/course.json`));
+  if (course.runner === 'unidex') continue;  // app courses run on the virtual unidex: tests/apps.test.mjs
   describe(course.title, () => {
     for (const file of course.lessons.filter(f => f.startsWith(process.env.LESSON || ''))) {
       it(file, async () => {

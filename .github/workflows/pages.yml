@@ -32,6 +32,10 @@ jobs:
         env:
           CHROME: /usr/bin/google-chrome
         run: node --test --test-timeout=180000 tests/pages.test.mjs
+      - name: The app course, on the virtual unidex
+        env:
+          CHROME: /usr/bin/google-chrome
+        run: node --test --test-concurrency=1 --test-timeout=300000 tests/apps.test.mjs tests/app-lessons.test.mjs
 
   deploy:
     needs: test
@@ -44,7 +48,7 @@ jobs:
       - name: Only the site's own files
         run: |
           mkdir _site
-          cp -r *.html *.js *.css og.png favicon.svg CNAME fonts courses _site/
+          cp -r *.html *.js *.css og.png favicon.svg CNAME fonts courses vendor _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

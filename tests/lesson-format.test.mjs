@@ -111,3 +111,22 @@ test('an output block is shown inside the example above it', () => {
   assert.match(l.html, /When it runs, the input is:.*It prints:<\/p><pre class="plain expected"><code>10<\/code><\/pre><\/div>$/s);
   assert.throws(() => parse('Text\n\n```output\n5\n```'), /output block goes straight after an example/);
 });
+
+test('app lessons: app.json starter and solution, and check steps', () => {
+  const l = parse([
+    '# One', '', '```lua', 'function draw() end', '```', '', '## Your turn', '',
+    '```starter', 'function draw() end', '```', '',
+    '```starter app.json', '{"id": "water"}', '```', '',
+    '```solution', 'function draw() unidex.centered(90, "0") end', '```', '',
+    '```check', 'shows: 0', 'press: b b B', 'reopen', 'hides: 2', '```',
+  ].join('\n'), 'lua');
+  assert.equal(l.examples.length, 1);
+  assert.match(l.html, /data-example="0"/);
+  assert.equal(l.starter, 'function draw() end\n');
+  assert.equal(l.starterJson, '{"id": "water"}\n');
+  assert.equal(l.solutionJson, null);
+  assert.deepEqual(l.checks, [[
+    { do: 'shows', text: '0' }, { do: 'press', keys: ['b', 'b', 'B'] }, { do: 'reopen' }, { do: 'hides', text: '2' },
+  ]]);
+  assert.throws(() => parse('```check\nwiggle: it\n```', 'lua'), /don't know: "wiggle: it"/);
+});

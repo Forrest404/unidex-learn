@@ -21,7 +21,7 @@
       <h1 id="title"></h1>
       <div id="text"></div>
     </article>
-    <aside class="workspace" aria-labelledby="ws-head">
+    <aside class="workspace" id="cpp-ws" aria-labelledby="ws-head" hidden>
       <h2 class="field-label" id="ws-head">Your code</h2>
       <div id="code"></div>
       <div class="run-bar">
@@ -45,6 +45,46 @@
         <pre><code id="answer-code"></code></pre>
       </div>
   <p class="note privacy">Run and Check send your code to <a href="https://godbolt.org" target="_blank" rel="noopener">Compiler Explorer</a> to build it, or to <a href="https://wandbox.org" target="_blank" rel="noopener">Wandbox</a> if that's busy. Nothing else leaves this browser.</p>
+    </aside>
+    <aside class="workspace app-ws" id="app-ws" aria-labelledby="app-head" hidden>
+      <h2 class="field-label" id="app-head">Your app</h2>
+      <div class="tabs" role="tablist" aria-label="Files">
+        <button type="button" role="tab" id="tab-main" aria-selected="true" aria-controls="app-code">main.lua</button>
+        <button type="button" role="tab" id="tab-json" aria-selected="false" aria-controls="app-code">app.json</button>
+      </div>
+      <div id="app-code" role="tabpanel"></div>
+      <div class="run-bar">
+        <button type="button" class="secondary" id="app-run">Run</button>
+        <button type="button" id="app-check">Check</button>
+        <span class="done-mark" id="app-done" hidden>Done</span>
+      </div>
+      <div class="device-row">
+        <div class="device" role="group" aria-label="The virtual unidex" tabindex="-1">
+          <canvas id="screen" width="200" height="200" role="img" aria-label="The unidex screen"></canvas>
+          <div class="device-buttons">
+            <button type="button" class="device-btn secondary" id="btnA" aria-label="Button A">A</button>
+            <button type="button" class="device-btn secondary" id="btnB" aria-label="Button B">B</button>
+          </div>
+          <p class="device-hint">Click, or press the A and B keys. Hold for a long press.</p>
+        </div>
+        <div class="device-out">
+          <p class="field-label" id="app-out-label">Output</p>
+          <div class="output" id="app-output" role="log" aria-labelledby="app-out-label" tabindex="0"
+               data-empty="Press Run to open your app on the unidex. What it prints shows here."></div>
+        </div>
+      </div>
+      <div class="run-bar more">
+        <button type="button" class="quiet small" id="app-show-answer" aria-expanded="false" aria-controls="app-answer">Show the answer</button>
+        <button type="button" class="quiet small" id="app-reset">Start again</button>
+        <button type="button" class="quiet small" id="app-download">Download .zip</button>
+        <button type="button" class="quiet small" id="app-install">Install on my unidex</button>
+      </div>
+      <div id="app-answer" hidden>
+        <p class="note">One way to do it. Yours can be different and still be right.</p>
+        <pre><code id="app-answer-code"></code></pre>
+      </div>
+      <p class="note privacy">Your app runs in this browser, on the real unidex firmware built for the web. Nothing you
+        write is sent anywhere.</p>
     </aside>
   </div>
   <nav class="pager" id="pager" aria-label="Lessons" hidden></nav>

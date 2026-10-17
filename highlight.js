@@ -7,7 +7,30 @@ const CPP_KW = words('if else while for do switch case default break continue re
   'class struct public private protected using namespace const static auto void this sizeof template typename try catch throw');
 const CPP_TYPE = words('int double float char bool long short unsigned signed string vector size_t std cout cin endl');
 
+const LUA_KW = words('and break do else elseif end false for function goto if in local nil not or repeat return then ' +
+  'true until while');
+
 const LANGS = {
+  // The same pieces as the tools site's App editor (github.com/Forrest404/unidex, site/editor.js)
+  lua: {
+    re: /(--\[(=*)\[[\s\S]*?(?:\]\2\]|(?![\s\S])))|(--[^\n]*)|(\[(=*)\[[\s\S]*?(?:\]\5\]|(?![\s\S])))|("(?:[^"\\\n]|\\[\s\S])*"?|'(?:[^'\\\n]|\\[\s\S])*'?)|(\b(?:0[xX][0-9a-fA-F]+|\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)\b)|([A-Za-z_]\w*)/g,
+    kind(m, src, end) {
+      if (m[1] || m[3]) return 'com';
+      if (m[4] || m[6]) return 'str';
+      if (m[7]) return 'num';
+      if (LUA_KW.has(m[0])) return 'kw';
+      if (m[0] === 'unidex') return 'type';
+      if (/^\s*\(/.test(src.slice(end, end + 20))) return 'call';
+      return null;
+    },
+  },
+  json: {
+    re: /("(?:[^"\\\n]|\\.)*"?)|(-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|\b(true|false|null)\b/g,
+    kind(m, src, end) {
+      if (m[1]) return /^\s*:/.test(src.slice(end)) ? 'kw' : 'str';
+      return m[2] ? 'num' : 'kw';
+    },
+  },
   cpp: {
     re: /(\/\*[\s\S]*?(?:\*\/|(?![\s\S])))|(\/\/[^\n]*)|(^[ \t]*#[ \t]*\w+)(?:([ \t]*<[^>\n]*>?))?|("(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?)|(\b\d+(?:\.\d*)?(?:[eE][+-]?\d+)?[fFlLuU]*\b|\.\d+\b)|([A-Za-z_]\w*)/gm,
     kind(m, src, end) {
@@ -34,7 +57,7 @@ export function tokens(src, lang) {
   while ((m = def.re.exec(src))) {
     if (!m[0].length) { def.re.lastIndex++; continue; }
     plain(src.slice(last, m.index));
-    if (m[3]) {  // #include <iostream>: the directive, then the header name
+    if (lang === 'cpp' && m[3]) {  // #include <iostream>: the directive, then the header name
       out.push(['kw', m[3]]);
       if (m[4]) { plain(m[4].match(/^\s*/)[0]); out.push(['str', m[4].trimStart()]); }
     } else {

@@ -62,6 +62,7 @@ export const el = (tag, props = {}, ...children) => {
 const MENUS = [
   { label: 'Courses', page: ['index.html', 'course.html', 'lesson.html', 'play.html'], items: [
     { label: 'All courses', desc: 'Pick one and start', href: './', icon: 'book' },
+    { label: 'Make your own unidex app', desc: 'From nothing to your own app on your unidex', href: 'course.html?c=apps', icon: 'tools' },
     { label: 'C++ for beginners', desc: 'Your first program to your first project', href: 'course.html?c=cpp', icon: 'code' },
     { label: 'Playground', desc: 'Write any C++ and run it', href: 'play.html', icon: 'code' },
   ] },

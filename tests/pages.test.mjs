@@ -14,8 +14,7 @@ test('home: header, footer and the course list', async () => {
   await page.goto('index.html');
   await page.waitFor(`document.querySelector('#courses .course')`);
   assert.equal(await page.eval(`document.querySelector('.site-head .brand small').textContent`), 'learn');
-  assert.equal(await page.eval(`document.querySelector('#courses .course b').textContent`), 'C++ for beginners');
-  assert.match(await page.eval(`document.querySelector('#courses .course').getAttribute('href')`), /course\.html\?c=cpp/);
+  assert.equal(await page.eval(`document.querySelector('#courses .course[href="course.html?c=cpp"] b').textContent`), 'C++ for beginners');
   assert.ok(await page.eval(`document.querySelector('.site-foot .foot-row')`));
   assert.ok(await noSideScroll());
   await page.shot('home-desktop-light');
@@ -214,8 +213,8 @@ test('check: wrong, broken, then right; the answer; progress on the course and h
   assert.equal(await page.eval(`document.querySelectorAll('#lessons li').length`), 13);
   await page.shot('course');
   await page.goto('index.html');
-  await page.waitFor(`document.querySelector('#courses .course small')`);
-  assert.equal(await page.eval(`document.querySelector('#courses .course small').textContent`), '1 of 13 lessons done');
+  await page.waitFor(`document.querySelector('#courses .course[href="course.html?c=cpp"] small')`);
+  assert.equal(await page.eval(`document.querySelector('#courses .course[href="course.html?c=cpp"] small').textContent`), '1 of 13 lessons done');
   assert.deepEqual(page.errors, []);
 });
 
@@ -298,4 +297,25 @@ test('ux: lesson rows on the course page are big enough to tap', async () => {
   const heights = await page.eval(`[...document.querySelectorAll('#lessons a')].map(a => a.getBoundingClientRect().height)`);
   assert.ok(heights.every(h => h >= 44), `row heights: ${heights}`);
   await page.size(1280, 900);
+});
+
+test('editor: Lua indenting (then, function, end) and 2-space Tab', async () => {
+  await page.goto('play.html');
+  await page.eval(`(async () => {
+    const { editor } = await import('./editor.js');
+    const box = document.createElement('div'); box.id = 'luaed'; document.querySelector('main').prepend(box);
+    window.luaEd = editor(box, { lang: 'lua', value: '' });
+  })()`);
+  const ta = `document.querySelector('#luaed textarea')`;
+  await page.eval(`${ta}.focus()`);
+  await page.type('function onB()\nif count > 0 then\ncount = count - 1\nend\nreturn "partial"\nend');
+  assert.equal(await page.eval(`${ta}.value`),
+    'function onB()\n  if count > 0 then\n    count = count - 1\n  end\n  return "partial"\nend');
+  assert.equal(await page.eval(`document.querySelector('#luaed .tk-kw').textContent`), 'function');
+  await page.key('Enter');
+  await page.type('x = send');  // "send" ends in "end" but isn't one: no step back
+  assert.match(await page.eval(`${ta}.value`), /\nx = send$/);
+  await page.key('Tab');
+  assert.match(await page.eval(`${ta}.value`), /send  $/);
+  assert.deepEqual(page.errors, []);
 });

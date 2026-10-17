@@ -30,3 +30,20 @@ test('HTML in code is escaped', () => {
   assert.equal(highlight('a < b && c > d', 'cpp'), 'a &lt; b &amp;&amp; c &gt; d');
   assert.equal(highlight('<script>', 'none'), '&lt;script&gt;');
 });
+
+const lua = src => tokens(src, 'lua').filter(([k]) => k).map(([k, t]) => `${k}:${t}`);
+
+test('Lua: keywords, unidex, calls, strings, numbers, comments', () => {
+  assert.deepEqual(lua('local n = 0 -- start'), ['kw:local', 'num:0', 'com:-- start']);
+  assert.deepEqual(lua('unidex.centered(100, "Hi " .. n)'), ['type:unidex', 'call:centered', 'num:100', 'str:"Hi "']);
+  assert.deepEqual(lua('if n > 0 then return "partial" end'), ['kw:if', 'num:0', 'kw:then', 'kw:return', 'str:"partial"', 'kw:end']);
+  assert.deepEqual(lua('--[[ two\nlines ]] x = [[raw]]'), ['com:--[[ two\nlines ]]', 'str:[[raw]]']);
+  assert.deepEqual(lua('s = "not -- a comment"'), ['str:"not -- a comment"']);
+  const src = 'function draw()\n  unidex.header("A")\nend\n';
+  assert.equal(tokens(src, 'lua').map(([, t]) => t).join(''), src);
+});
+
+test('JSON: keys, strings, numbers, true/false', () => {
+  assert.deepEqual(tokens('{"id": "my-app", "api": 1, "x": true}', 'json').filter(([k]) => k).map(([k, t]) => `${k}:${t}`),
+    ['kw:"id"', 'str:"my-app"', 'kw:"api"', 'num:1', 'kw:"x"', 'kw:true']);
+});

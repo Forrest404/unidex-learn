@@ -1,0 +1,21 @@
+{
+  "title": "Make your own unidex app",
+  "lang": "lua",
+  "runner": "unidex",
+  "blurb": "Start from nothing and build a real app for your unidex, step by step, trying each step on a virtual unidex right here. At the end you make it your own and put it on your device.",
+  "appJson": "{\n  \"id\": \"water\",\n  \"name\": \"Water\",\n  \"version\": \"1.0.0\",\n  \"author\": \"\",\n  \"description\": \"Counts the glasses of water I drink.\",\n  \"category\": \"tools\",\n  \"api\": 1,\n  \"type\": \"app\",\n  \"permissions\": []\n}\n",
+  "lessons": [
+    "01-first-app.md",
+    "02-the-screen.md",
+    "03-variables.md",
+    "04-buttons.md",
+    "05-choices.md",
+    "06-functions.md",
+    "07-saving.md",
+    "08-drawing.md",
+    "09-lists-and-screens.md",
+    "10-time.md",
+    "11-name-and-icon.md",
+    "12-make-it-yours.md"
+  ]
+}

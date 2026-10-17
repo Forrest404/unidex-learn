@@ -9,6 +9,11 @@
 //   ```starter   the code the editor starts with
 //   ```solution  one right answer, hidden until asked for
 //   ```test      input: (lines the program reads)  output: (what it must print). A lesson can have several.
+// App courses (runner "unidex") also have:
+//   ```starter app.json / ```solution app.json   the app.json to start from, and the answer's (else the course's)
+//   ```check     steps run on the virtual unidex, one per line: press: b b B (capitals are holds), reopen,
+//                shows: text, hides: text ({day} {month} {year} are today's), fills: n, rects: n (boxes drawn),
+//                has: key (app.json has it). A lesson can have several; each starts the app afresh.
 import { highlight } from './highlight.js';
 
 const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -30,8 +35,23 @@ function parseTest(body) {
   return m.length === 3 ? { input: m[1], output: m[2] } : { input: '', output: m[1] };
 }
 
+function parseCheck(lines) {
+  const steps = [];
+  for (const l of lines.map(x => x.trim()).filter(Boolean)) {
+    let m;
+    if ((m = /^press:\s*([abAB](?:\s+[abAB])*)$/.exec(l))) steps.push({ do: 'press', keys: m[1].split(/\s+/) });
+    else if (l === 'reopen') steps.push({ do: 'reopen' });
+    else if ((m = /^(shows|hides):\s*(.+)$/.exec(l))) steps.push({ do: m[1], text: m[2] });
+    else if ((m = /^(fills|rects):\s*(\d+)$/.exec(l))) steps.push({ do: m[1], n: +m[2] });
+    else if ((m = /^has:\s*([\w-]+)$/.exec(l))) steps.push({ do: 'has', key: m[1] });
+    else throw new Error(`A check step I don't know: "${l}"`);
+  }
+  return steps;
+}
+
 export function parse(src, lang = 'cpp') {
-  const lesson = { title: '', html: '', examples: [], inputs: [], outputs: [], starter: '', solution: '', tests: [] };
+  const lesson = { title: '', html: '', examples: [], inputs: [], outputs: [], starter: '', solution: '', tests: [],
+                   starterJson: null, solutionJson: null, checks: [] };
   const out = [];
   const lines = src.replace(/\r\n?/g, '\n').split('\n');
   let para = [], list = null;
@@ -43,15 +63,17 @@ export function parse(src, lang = 'cpp') {
   };
   for (let i = 0; i < lines.length; i++) {
     const l = lines[i];
-    const fence = /^```(\w*)\s*$/.exec(l);
+    const fence = /^```(\w*)(?:[ \t]+([\w.-]+))?\s*$/.exec(l);
     if (fence) {
       flush();
       const body = [];
       while (++i < lines.length && !/^```\s*$/.test(lines[i])) body.push(lines[i]);
       const code = body.join('\n') + '\n';
       const kind = fence[1] || 'text';
-      if (kind === 'starter') lesson.starter = code;
+      if (fence[2] === 'app.json' && (kind === 'starter' || kind === 'solution')) lesson[`${kind}Json`] = code;
+      else if (kind === 'starter') lesson.starter = code;
       else if (kind === 'solution') lesson.solution = code;
+      else if (kind === 'check') lesson.checks.push(parseCheck(body));
       else if (kind === 'test') lesson.tests.push(parseTest(body.join('\n')));
       else if (kind === lang) {
         const n = lesson.examples.push(code) - 1;
