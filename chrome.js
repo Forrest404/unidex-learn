@@ -12,6 +12,7 @@ const ICONS = {
   book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/><path d="M8 7h7"/>',
   check: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
   tools: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  game: '<rect x="3" y="7" width="18" height="10" rx="3"/><path d="M8 10v4M6 12h4"/><circle cx="16" cy="12" r="1"/>',
   bag: '<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
@@ -63,6 +64,7 @@ const MENUS = [
   { label: 'Courses', page: ['index.html', 'course.html', 'lesson.html', 'play.html'], items: [
     { label: 'All courses', desc: 'Pick one and start', href: './', icon: 'book' },
     { label: 'Make your own unidex app', desc: 'From nothing to your own app on your unidex', href: 'course.html?c=apps', icon: 'tools' },
+    { label: 'Make your own unidex game', desc: 'A one-button game, from nothing to Games on your unidex', href: 'course.html?c=games', icon: 'game' },
     { label: 'C++ for beginners', desc: 'Your first program to your first project', href: 'course.html?c=cpp', icon: 'code' },
     { label: 'Playground', desc: 'Write any C++ and run it', href: 'play.html', icon: 'code' },
   ] },
