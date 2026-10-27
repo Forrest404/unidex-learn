@@ -130,3 +130,16 @@ test('app lessons: app.json starter and solution, and check steps', () => {
   ]]);
   assert.throws(() => parse('```check\nwiggle: it\n```', 'lua'), /don't know: "wiggle: it"/);
 });
+
+test('game lessons: play, seed, again, over, playing, score, box, remember, same and changed', () => {
+  const l = parse(['```check', 'seed: 3', 'play: 0*3 1 01*2', 'box: 30 100-140 * -12', 'over', 'playing', 'score: 2',
+    'again', 'remember', 'same', 'changed', 'shows: 1', '```'].join('\n'), 'lua');
+  assert.deepEqual(l.checks, [[
+    { do: 'seed', n: 3 }, { do: 'play', frames: '00010101' }, { do: 'box', box: [[30, 30], [100, 140], null, [-12, -12]] },
+    { do: 'over' }, { do: 'playing' }, { do: 'score', n: 2 }, { do: 'again' }, { do: 'remember' }, { do: 'same' },
+    { do: 'changed' }, { do: 'shows', text: '1' },
+  ]]);
+  for (const bad of ['play: 012', 'play: 0*', 'play:', 'box: 1 2 3', 'box: 1 2 3 x', 'seed: x', 'again now']) {
+    assert.throws(() => parse('```check\n' + bad + '\n```', 'lua'), /don't know/, bad);
+  }
+});

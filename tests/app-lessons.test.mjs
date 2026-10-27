@@ -1,7 +1,10 @@
-// Every lesson of the app course, on the virtual unidex in a real (headless) Chrome:
+// Every lesson of the unidex courses (apps and games), on the virtual unidex in a real (headless) Chrome:
 //   node --test tests/app-lessons.test.mjs
 //   LESSON=03 node --test tests/app-lessons.test.mjs     just the lessons whose file starts with 03
+//   COURSE=games node --test tests/app-lessons.test.mjs  just one course
 // For each lesson: the answer passes Check, the starter doesn't, and every example opens without an error.
+// A game course needs games in the emulator build it uses (API 4); until that build has them, its lessons are
+// skipped here (tests/game-lessons.test.mjs plays them on a model of Games instead).
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -9,7 +12,6 @@ import { start } from './browser.mjs';
 import { parse } from '../lesson-format.js';
 
 const read = p => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
-const course = JSON.parse(read('courses/apps/course.json'));
 let page;
 before(async () => { page = await start(); await page.size(1280, 900); });
 after(() => page.close());
@@ -27,27 +29,53 @@ async function check(main, json) {
   return page.eval(`${out}.textContent`);
 }
 
-for (const [i, file] of course.lessons.entries()) {
-  if (!file.startsWith(process.env.LESSON || '')) continue;
-  test(file, async () => {
-    const l = parse(read(`courses/apps/${file}`), 'lua');
-    assert.ok(l.title && l.starter && l.solution && l.checks.length, 'needs a title, a starter, a solution and a check');
-    assert.match(l.html, /<h2>Your turn<\/h2>/);
-    await page.goto(`lesson.html?c=apps&l=${i + 1}`);
-    await page.eval(`localStorage.clear()`);
-    await page.goto(`lesson.html?c=apps&l=${i + 1}`);
-    await page.waitFor(`!document.getElementById('lesson').hidden && window.appWorkspace`);
+// The API level of the emulator on the page (unidex.api, which an app prints)
+const apis = {};
+async function emulatorApi(id) {
+  apis[id] ??= await page.eval(`(async () => {
+    const emu = await window.appWorkspace.emu;
+    let api = null;
+    emu.onPrint(t => { const m = /^api-probe: (\\d+)/.exec(t); if (m) api = +m[1]; });
+    const enc = new TextEncoder();
+    const entry = await emu.install([{ path: 'main.lua', bytes: enc.encode('print(unidex.api)\\nfunction draw() end\\n') },
+      { path: 'app.json', bytes: enc.encode('{"id": "api-probe", "name": "API probe", "version": "1.0.0", "api": 1, "type": "app"}') }]);
+    await emu.open(entry);
+    for (let i = 0; i < 50 && api === null; i++) await new Promise(r => setTimeout(r, 100));
+    return api;
+  })()`);
+  return apis[id];
+}
 
-    const json = l.solutionJson || l.starterJson || course.appJson;
-    assert.equal(await check(l.solution, json), "That's right. Well done!", 'the answer passes');
-    const starter = await check(l.starter, l.starterJson || course.appJson);
-    assert.match(starter, /^Not quite yet\./, 'the starter does not pass yet');
+for (const id of JSON.parse(read('courses/index.json'))) {
+  const course = JSON.parse(read(`courses/${id}/course.json`));
+  if (course.runner !== 'unidex' || !id.startsWith(process.env.COURSE || '')) continue;
+  const game = JSON.parse(course.appJson).type === 'game';
+  for (const [i, file] of course.lessons.entries()) {
+    if (!file.startsWith(process.env.LESSON || '')) continue;
+    test(`${id}/${file}`, async t => {
+      const l = parse(read(`courses/${id}/${file}`), 'lua');
+      assert.ok(l.title && l.starter && l.solution && l.checks.length, 'needs a title, a starter, a solution and a check');
+      assert.match(l.html, /<h2>Your turn<\/h2>/);
+      await page.goto(`lesson.html?c=${id}&l=${i + 1}`);
+      await page.eval(`localStorage.clear()`);
+      await page.goto(`lesson.html?c=${id}&l=${i + 1}`);
+      await page.waitFor(`!document.getElementById('lesson').hidden && window.appWorkspace`);
+      if (game && !((await emulatorApi(id)) >= 4)) {
+        t.skip(`the "${course.emu || 'latest'}" emulator has API ${apis[id]}, and games need 4`);
+        return;
+      }
 
-    for (const [n] of l.examples.entries()) {
-      await page.eval(`document.querySelectorAll('.example button')[${n}].click()`);
-      await page.waitFor(`!document.getElementById('app-run').disabled && ${out}.textContent && !/^(Starting|Putting)/.test(${out}.textContent)`, 60000);
-      assert.match(await page.eval(`${out}.textContent`), /Example is running/, `example ${n + 1}: ${await page.eval(`${out}.textContent`)}`);
-    }
-    assert.deepEqual(page.errors, []);
-  });
+      const json = l.solutionJson || l.starterJson || course.appJson;
+      assert.equal(await check(l.solution, json), "That's right. Well done!", 'the answer passes');
+      const starter = await check(l.starter, l.starterJson || course.appJson);
+      assert.match(starter, /^Not quite yet\./, 'the starter does not pass yet');
+
+      for (const [n] of l.examples.entries()) {
+        await page.eval(`document.querySelectorAll('.example button')[${n}].click()`);
+        await page.waitFor(`!document.getElementById('app-run').disabled && ${out}.textContent && !/^(Starting|Putting)/.test(${out}.textContent)`, 60000);
+        assert.match(await page.eval(`${out}.textContent`), /Example is running/, `example ${n + 1}: ${await page.eval(`${out}.textContent`)}`);
+      }
+      assert.deepEqual(page.errors, []);
+    });
+  }
 }

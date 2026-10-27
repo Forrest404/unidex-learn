@@ -248,18 +248,39 @@ test('the answer shows app.json too when that is where the answer is', async () 
   assert.equal(await page.eval(`document.querySelectorAll('#app-answer .input-label').length`), 0, 'only main.lua, unlabelled, elsewhere');
 });
 
-test('the app course comes first: home page, menu, and its course page', async () => {
+test('the app course comes first, then games: home page, menu, and the course pages', async () => {
   await page.size(1280, 900);
   await page.goto('index.html');
-  await page.waitFor(`document.querySelectorAll('#courses .course').length === 2`);
+  await page.waitFor(`document.querySelectorAll('#courses .course').length === 3`);
   assert.deepEqual(await page.eval(`[...document.querySelectorAll('#courses .course b')].map(b => b.textContent)`),
-    ['Make your own unidex app', 'C++ for beginners']);
+    ['Make your own unidex app', 'Make your own unidex game', 'C++ for beginners']);
   assert.equal(await page.eval(`document.querySelector('#menu-0 li:nth-child(2) a').textContent`), 'Make your own unidex app');
-  await page.shot('home-two-courses');
+  assert.equal(await page.eval(`document.querySelector('#menu-0 li:nth-child(3) a').textContent`), 'Make your own unidex game');
+  await page.shot('home-three-courses');
   await page.goto('course.html?c=apps');
   await page.waitFor(`!document.getElementById('course').hidden`);
   assert.equal(await page.eval(`document.querySelectorAll('#lessons li').length`), 12);
   assert.equal(await page.eval(`document.querySelector('#lessons a').textContent`), 'Your first app');
   await page.shot('course-apps');
+  await page.goto('course.html?c=games');
+  await page.waitFor(`!document.getElementById('course').hidden`);
+  assert.equal(await page.eval(`document.querySelectorAll('#lessons li').length`), 8);
+  assert.equal(await page.eval(`document.querySelector('#lessons a').textContent`), 'A game is four functions');
+  await page.shot('course-games');
+  assert.deepEqual(page.errors, []);
+});
+
+test('each course runs on its own firmware: games on "next" (they need API 4), apps on the release', async () => {
+  const { latest } = await (await fetch('https://tools.unidex.shop/emu/versions.json')).json();
+  const loaded = () => page.eval(`performance.getEntriesByType('resource').map(r => r.name).find(n => n.endsWith('/unidex.js'))`);
+  await page.goto('lesson.html?c=games&l=1');
+  await page.waitFor(`!!window.unidexEmu`, 60000);
+  assert.match(await loaded(), /\/emu\/next\/unidex\.js$/);
+  assert.equal(await page.eval(`document.getElementById('app-head').textContent`), 'Your game');
+  assert.match(await page.eval(`window.appWorkspace.files['app.json'].text`), /"type": "game"/);
+  await page.goto('lesson.html?c=apps&l=1');
+  await page.waitFor(`!!window.unidexEmu`, 60000);
+  assert.ok((await loaded()).endsWith(`/emu/${latest}/unidex.js`), await loaded());
+  assert.equal(await page.eval(`document.getElementById('app-head').textContent`), 'Your app');
   assert.deepEqual(page.errors, []);
 });
