@@ -1,0 +1,18 @@
+{
+  "title": "Make your own unidex game",
+  "lang": "lua",
+  "runner": "unidex",
+  "emu": "next",
+  "blurb": "Build a one-button game for your unidex step by step, playing each step on a virtual unidex right here. At the end you make it your own and put it in Games. It helps to do the app course first.",
+  "appJson": "{\n  \"id\": \"hop\",\n  \"name\": \"Hop\",\n  \"version\": \"1.0.0\",\n  \"author\": \"\",\n  \"description\": \"Jump over the walls.\",\n  \"category\": \"games\",\n  \"api\": 4,\n  \"type\": \"game\",\n  \"permissions\": []\n}\n",
+  "lessons": [
+    "01-four-functions.md",
+    "02-the-scene.md",
+    "03-moving.md",
+    "04-jumping.md",
+    "05-walls.md",
+    "06-score.md",
+    "07-random.md",
+    "08-make-it-yours.md"
+  ]
+}
