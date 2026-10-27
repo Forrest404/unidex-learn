@@ -14,6 +14,9 @@
 //   ```check     steps run on the virtual unidex, one per line: press: b b B (capitals are holds), reopen,
 //                shows: text, hides: text ({day} {month} {year} are today's), fills: n, rects: n (boxes drawn),
 //                has: key (app.json has it). A lesson can have several; each starts the app afresh.
+//                Games (app.json "type": "game") also have: play: 0*30 1*5 (frames, B up 0 or down 1, *n repeats),
+//                seed: n, again (a new round), over, playing, score: n, box: x y w h (each a number, a-b or *),
+//                remember, then same or changed (the screen against the one remembered).
 import { highlight } from './highlight.js';
 
 const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -44,7 +47,14 @@ function parseCheck(lines) {
     else if ((m = /^(shows|hides):\s*(.+)$/.exec(l))) steps.push({ do: m[1], text: m[2] });
     else if ((m = /^(fills|rects):\s*(\d+)$/.exec(l))) steps.push({ do: m[1], n: +m[2] });
     else if ((m = /^has:\s*([\w-]+)$/.exec(l))) steps.push({ do: 'has', key: m[1] });
-    else throw new Error(`A check step I don't know: "${l}"`);
+    // Games
+    else if ((m = /^play:\s*([01]+(?:\*\d+)?(?:\s+[01]+(?:\*\d+)?)*)$/.exec(l))) {
+      steps.push({ do: 'play', frames: m[1].split(/\s+/).map(g => { const [b, n = 1] = g.split('*'); return b.repeat(+n); }).join('') });
+    } else if ((m = /^(seed|score):\s*(-?\d+)$/.exec(l))) steps.push({ do: m[1], n: +m[2] });
+    else if (/^(again|over|playing|remember|same|changed)$/.test(l)) steps.push({ do: l });
+    else if ((m = /^box:\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/.exec(l)) && m.slice(1).every(n => /^(\*|-?\d+|\d+-\d+)$/.test(n))) {
+      steps.push({ do: 'box', box: m.slice(1).map(n => (n === '*' ? null : n.includes('-', 1) ? n.split('-').map(Number) : [+n, +n])) });
+    } else throw new Error(`A check step I don't know: "${l}"`);
   }
   return steps;
 }

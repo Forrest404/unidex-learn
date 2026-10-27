@@ -1,7 +1,9 @@
 // The virtual unidex on a lesson page: the real firmware, compiled for the browser, loaded from the tools site
 // (tools.unidex.shop/emu/, which any site may load). It draws the screen onto a canvas and takes the A and B buttons
 // from the page's buttons or the A/B keys. vendor/emu-device.js then installs and opens apps on it.
-//   startDevice({ canvas, btnA, btnB }) -> Promise of the emulator, also announced as window.unidexEmu
+// A course can ask for another build than the released one with "emu" in its course.json (an id from versions.json,
+// such as "next" for firmware that isn't out yet); without it, or if that build is gone, it's "latest".
+//   startDevice({ canvas, btnA, btnB, version }) -> Promise of the emulator, also announced as window.unidexEmu
 export const EMU = 'https://tools.unidex.shop/emu/';
 
 const loadScript = src => new Promise((ok, bad) => {
@@ -14,7 +16,7 @@ const loadScript = src => new Promise((ok, bad) => {
 });
 
 let started = null;
-export function startDevice({ canvas, btnA, btnB }) {
+export function startDevice({ canvas, btnA, btnB, version }) {
   if (started) return started;
   const ctx = canvas.getContext('2d');
   const img = ctx.createImageData(200, 200);
@@ -52,7 +54,8 @@ export function startDevice({ canvas, btnA, btnB }) {
 
   started = (async () => {
     const list = await (await fetch(`${EMU}versions.json`)).json();
-    const dir = `${EMU}${list.latest}/`;
+    const id = list.versions?.some(v => v.id === version) ? version : list.latest;
+    const dir = `${EMU}${id}/`;
     await loadScript(`${dir}unidex.js`);
     mod = await globalThis.createUnidex({ onScreen: draw, print() {}, printErr() {}, locateFile: f => dir + f });
     window.unidexEmu = mod;

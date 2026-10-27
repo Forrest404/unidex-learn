@@ -1,6 +1,8 @@
 // The app workspace on a lesson page: main.lua and app.json in tabs, the virtual unidex (device.js) beside what the
 // app prints, and Run, which installs the app on it and opens it the way a person would (vendor/emu-device.js).
 // An example in the text runs on the same unidex, under its own id, so it never touches the learner's app or data.
+// A course whose appJson is a game ("type": "game") makes games: they open from Games instead of Apps
+// (unidex-emu.js), and the course can pick the firmware they need with "emu" in course.json (device.js).
 import { el } from './chrome.js';
 import { editor } from './editor.js';
 import { highlight } from './highlight.js';
@@ -11,10 +13,14 @@ import { getCode, setCode, clearCode } from './progress.js';
 const $ = id => document.getElementById(id);
 const enc = new TextEncoder();
 const EXAMPLE_JSON = '{\n  "id": "example",\n  "name": "Example",\n  "version": "1.0.0",\n  "api": 1,\n  "type": "app"\n}\n';
+const EXAMPLE_GAME = '{\n  "id": "example",\n  "name": "Example",\n  "version": "1.0.0",\n  "category": "games",\n  "api": 4,\n  "type": "game"\n}\n';
 
 export function appWorkspace({ course, lesson, where, finished }) {
   $('app-ws').hidden = false;
   const starterJson = lesson.starterJson || course.appJson;
+  let game = false;
+  try { game = JSON.parse(course.appJson).type === 'game'; } catch { /* an app */ }
+  if (game) $('app-head').textContent = 'Your game';
   const files = {
     'main.lua': { lang: 'lua', key: where, start: lesson.starter },
     'app.json': { lang: 'json', key: `${where}#app.json`, start: starterJson },
@@ -61,8 +67,8 @@ export function appWorkspace({ course, lesson, where, finished }) {
   }
 
   // ---- the virtual unidex ----
-  const device = startDevice({ canvas: $('screen'), btnA: $('btnA'), btnB: $('btnB') });
-  const emu = device.then(() => import('./vendor/emu-device.js'));
+  const device = startDevice({ canvas: $('screen'), btnA: $('btnA'), btnB: $('btnB'), version: course.emu });
+  const emu = device.then(() => import('./unidex-emu.js'));
   device.catch(e => say(`The unidex didn't start: ${e.message}. Check you're online and reload the page.`, 'err'));
   let running = null;  // the id of the app on the screen, for its print()s
   emu.then(({ onPrint }) => onPrint(text => {
@@ -98,6 +104,7 @@ export function appWorkspace({ course, lesson, where, finished }) {
       lastFailure = err;
       status.remove();
       if (err) showError(err);
+      else if (entry.type === 'game') say(`${entry.name} is running. B is the button, and holding A leaves the round.`, 'ok');
       else say(`${entry.name} is running. Press A and B to try it.`, 'ok');
       $('screen').closest('.device').focus({ preventScroll: true });
       $('screen').scrollIntoView({ block: 'nearest' });
@@ -165,7 +172,7 @@ export function appWorkspace({ course, lesson, where, finished }) {
     const btn = el('button', { type: 'button', class: 'secondary small', text: 'Run', 'aria-label': 'Run this example on the unidex' });
     btn.onclick = () => runOnDevice([
       { path: 'main.lua', bytes: enc.encode(lesson.examples[+box.dataset.example]) },
-      { path: 'app.json', bytes: enc.encode(EXAMPLE_JSON) },
+      { path: 'app.json', bytes: enc.encode(game ? EXAMPLE_GAME : EXAMPLE_JSON) },
     ], { buttons: [...work, btn] });  // its saved data stays, as on a real unidex (lesson 7's example counts visits)
     box.append(el('div', { class: 'run-bar' }, btn));
   }
@@ -212,7 +219,7 @@ export function appWorkspace({ course, lesson, where, finished }) {
       const { installOnUnidex } = await import('./install-device.js');
       const name = await installOnUnidex(list, t => { status.textContent = t; });
       status.remove();
-      say(`${name} is on your unidex. Find it under Apps.`, 'ok');
+      say(`${name} is on your unidex. Find it under ${game ? 'Games' : 'Apps'}.`, 'ok');
     } catch (e) {
       status.remove();
       say(e.message || String(e), 'err');
